@@ -9,3 +9,4 @@
 8º Rode o comando no terminal : vendor/bin/phinx create CreateUsersTable <br>
 9º Rode o comando no terminal: vendor/bin/phinx migrate <br>
 10º Verifique em seu banco de dados se foi criado a tabela de users. <br>
+11º Crie rode seu primeiro Seed de users: vendor/bin/phinx seed:run -s UserSeeder  <br>
