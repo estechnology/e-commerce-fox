@@ -5,5 +5,7 @@
 5º Faça a configuração de conexão com seu banco de dados Mysql<br>
 ![image](https://github.com/user-attachments/assets/095ca1a5-9681-4fd0-908e-50de26e07757)<br><br>
 6º Para verificar se a conexão deu certo acesse a rota: http://localhost:8000/test-db <br>
-7º rode o comando no terminal : vendor/bin/phinx init <br>
-8º rode o comando no terminal : vendor/bin/phinx create CreateUsersTable <br>
+7º Rode o comando no terminal : vendor/bin/phinx init <br>
+8º Rode o comando no terminal : vendor/bin/phinx create CreateUsersTable <br>
+9º Rode o comando no terminal: vendor/bin/phinx migrate <br>
+10º Verifique em seu banco de dados se foi criado a tabela de users. <br>
