@@ -10,3 +10,7 @@
 9º Rode o comando no terminal: vendor/bin/phinx migrate <br>
 10º Verifique em seu banco de dados se foi criado a tabela de users. <br>
 11º Crie rode seu primeiro Seed de users: vendor/bin/phinx seed:run -s UserSeeder  <br>
+12º Rode o select no banco para a confirmação do insert da Seed: <br>
+![image](https://github.com/user-attachments/assets/2bc07af2-625f-4ba6-a369-199124b72dfa) <br><br>
+
+
