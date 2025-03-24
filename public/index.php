@@ -5,6 +5,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use App\Controllers\HelloController;
+use App\Controllers\CartController;
 use App\Database;
 
 $config = require __DIR__ . '/../config/config.php';
@@ -34,6 +35,27 @@ $app->get('/test-db', function (Request $request, Response $response, array $arg
         $response->getBody()->write('Erro na conexão: ' . $e->getMessage());
     }
     return $response;
+});
+
+// Rotas do carrinho de compras
+$app->post('/carrinho/adicionar', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->addItem($request, $response);
+});
+
+$app->get('/carrinho', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->listItems($request, $response);
+});
+
+$app->delete('/carrinho/remover/{id}', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->removeItem($request, $response, $args);
+});
+
+$app->post('/carrinho/finalizar', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->finalizeCart($request, $response);
 });
 
 // Rodar a aplicação
