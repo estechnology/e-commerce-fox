@@ -15,3 +15,5 @@
 
 13º Executar Seeds Products : vendor/bin/phinx seed:run -s ProductSeeder <br>
 14º Executar Seeds Cart_itens : vendor/bin/phinx seed:run -s CartItemSeeder <br>
+15º Executar primeira lógica de cart-itens: <br>
+![image](https://github.com/user-attachments/assets/2314c420-3279-455a-b325-1b53b44fa3b5) <br>
