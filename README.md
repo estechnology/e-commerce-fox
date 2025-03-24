@@ -1,3 +1,7 @@
+
+
+Abaixo descrevo como eu fui criando a logica dos itens desenvolvidos e sua sequencia para vocês irem acompanhando a linha de Raciocínio: <br><br>
+
 1º Rode o git clone https://github.com/estechnology/e-commerce-fox.git<br>
 2º Rode o comando : Utilizar o comando "composer dump-autoload" para gerar o autoload <br>
 3º Rode o comando: php -S localhost:8000 -t public<br>
