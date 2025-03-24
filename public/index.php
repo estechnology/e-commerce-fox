@@ -38,14 +38,34 @@ $app->get('/test-db', function (Request $request, Response $response, array $arg
 });
 
 // Rotas do carrinho de compras
+$app->post('/carrinho', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->createCart($request, $response);
+});
+
+$app->get('/carrinho/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->getCart($request, $response, $args);
+});
+
+$app->put('/carrinho/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->updateCart($request, $response, $args);
+});
+
+$app->delete('/carrinho/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->deleteCart($request, $response, $args);
+});
+
 $app->post('/carrinho/adicionar', function (Request $request, Response $response, array $args) use ($db) {
     $controller = new CartController($db);
     return $controller->addItem($request, $response);
 });
 
-$app->get('/carrinho', function (Request $request, Response $response, array $args) use ($db) {
+$app->get('/carrinho/{cart_id}/itens', function (Request $request, Response $response, array $args) use ($db) {
     $controller = new CartController($db);
-    return $controller->listItems($request, $response);
+    return $controller->listItems($request, $response, $args);
 });
 
 $app->delete('/carrinho/remover/{id}', function (Request $request, Response $response, array $args) use ($db) {
@@ -53,9 +73,9 @@ $app->delete('/carrinho/remover/{id}', function (Request $request, Response $res
     return $controller->removeItem($request, $response, $args);
 });
 
-$app->post('/carrinho/finalizar', function (Request $request, Response $response, array $args) use ($db) {
+$app->post('/carrinho/finalizar/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
     $controller = new CartController($db);
-    return $controller->finalizeCart($request, $response);
+    return $controller->finalizeCart($request, $response, $args);
 });
 
 // Rodar a aplicação
