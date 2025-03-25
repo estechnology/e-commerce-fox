@@ -27,4 +27,6 @@ Abaixo descrevo como eu fui criando a logica dos itens desenvolvidos e sua seque
     "username": "admFox",
     "password": "ixFezwFgT^rY@a&pf%2q$@"
 }<br>
+ 18º Criação de documentação e testes unitários: <br>
+ ![image](https://github.com/user-attachments/assets/681431b0-03a5-4f8d-8818-7ec74d4074cc)<br>
 
