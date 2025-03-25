@@ -1,4 +1,4 @@
-Documentação dos Endpoints: https://documenter.getpostman.com/view/30434146/2sAYkKJHcT#00ca9f8a-94a6-420d-a53e-c527be0de4e7 <br><br>
+Documentação dos Endpoints: https://documenter.getpostman.com/view/30434146/2sAYkKJHcT <br><br>
 
 Abaixo descrevo como eu fui criando a logica dos itens desenvolvidos e sua sequencia para vocês irem acompanhando a linha de Raciocínio: <br><br>
 
