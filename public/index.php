@@ -75,7 +75,7 @@ $app->group('/carrinho', function (\Slim\Routing\RouteCollectorProxy $group) use
 
 // Rotas públicas (Autenticação)
 $app->get('/', function (Request $request, Response $response, array $args) {
-    $response->getBody()->write("Hello, World!");
+    $response->getBody()->write("Bem vindo a API de Carrinho de Compras, aqui você pode criar, atualizar e deletar carrinhos de compras,o projeto foi desenvolvido no Framework Slim e Twig, qualquer dúvida entre em contato com o desenvolvedor => Eduardo Sampaio (17)98189-6773 ");
     return $response;
 });
 
