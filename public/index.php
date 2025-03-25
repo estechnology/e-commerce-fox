@@ -6,20 +6,79 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use App\Controllers\HelloController;
 use App\Controllers\CartController;
+use App\Controllers\AuthController;
 use App\Database;
+use App\Middleware\JwtMiddleware;
 
 $config = require __DIR__ . '/../config/config.php';
+$jwtConfig = require __DIR__ . '/../config/jwt.php';
 $db = new Database($config['db']);
 
 $app = AppFactory::create();
 
-// Definir a rota Hello World
+// Rota para autenticação do token.
+$app->post('/auth', function (Request $request, Response $response) use ($jwtConfig, $db) {
+    $controller = new AuthController($jwtConfig, $db);
+    return $controller->generateToken($request, $response);
+});
+
+// Rotas protegidas
+$app->group('/carrinho', function (\Slim\Routing\RouteCollectorProxy $group) use ($db) {
+    // Criar um novo carrinho
+    $group->post('', function (Request $request, Response $response) use ($db) {
+        $controller = new CartController($db);
+        return $controller->createCart($request, $response);
+    });
+
+    // Obter carrinho por ID
+    $group->get('/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+        $controller = new CartController($db);
+        return $controller->getCart($request, $response, $args);
+    });
+
+    // Atualizar carrinho
+    $group->put('/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+        $controller = new CartController($db);
+        return $controller->updateCart($request, $response, $args);
+    });
+
+    // Deletar carrinho
+    $group->delete('/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+        $controller = new CartController($db);
+        return $controller->deleteCart($request, $response, $args);
+    });
+
+    // Adicionar item ao carrinho
+    $group->post('/adicionar', function (Request $request, Response $response) use ($db) {
+        $controller = new CartController($db);
+        return $controller->addItem($request, $response);
+    });
+
+    // Listar itens do carrinho
+    $group->get('/{cart_id}/itens', function (Request $request, Response $response, array $args) use ($db) {
+        $controller = new CartController($db);
+        return $controller->listItems($request, $response, $args);
+    });
+
+    // Remover item do carrinho
+    $group->delete('/remover/{id}', function (Request $request, Response $response, array $args) use ($db) {
+        $controller = new CartController($db);
+        return $controller->removeItem($request, $response, $args);
+    });
+
+    // Finalizar carrinho
+    $group->post('/finalizar/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
+        $controller = new CartController($db);
+        return $controller->finalizeCart($request, $response, $args);
+    });
+})->add(new JwtMiddleware($jwtConfig));
+
+// Rotas públicas (Autenticação)
 $app->get('/', function (Request $request, Response $response, array $args) {
     $response->getBody()->write("Hello, World!");
     return $response;
 });
 
-// Rota para exibir Hello World com Twig
 $app->get('/hello-twig', function (Request $request, Response $response, array $args) use ($db) {
     $controller = new HelloController($db);
     return $controller->index($request, $response);
@@ -35,47 +94,6 @@ $app->get('/test-db', function (Request $request, Response $response, array $arg
         $response->getBody()->write('Erro na conexão: ' . $e->getMessage());
     }
     return $response;
-});
-
-// Rotas do carrinho de compras
-$app->post('/carrinho', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->createCart($request, $response);
-});
-
-$app->get('/carrinho/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->getCart($request, $response, $args);
-});
-
-$app->put('/carrinho/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->updateCart($request, $response, $args);
-});
-
-$app->delete('/carrinho/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->deleteCart($request, $response, $args);
-});
-
-$app->post('/carrinho/adicionar', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->addItem($request, $response);
-});
-
-$app->get('/carrinho/{cart_id}/itens', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->listItems($request, $response, $args);
-});
-
-$app->delete('/carrinho/remover/{id}', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->removeItem($request, $response, $args);
-});
-
-$app->post('/carrinho/finalizar/{cart_id}', function (Request $request, Response $response, array $args) use ($db) {
-    $controller = new CartController($db);
-    return $controller->finalizeCart($request, $response, $args);
 });
 
 // Rodar a aplicação

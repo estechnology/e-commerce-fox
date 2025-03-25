@@ -4,7 +4,8 @@
         "slim/psr7": "^1.7",
         "twig/twig": "^3.20",
         "doctrine/dbal": "^3.0",
-        "robmorgan/phinx": "^0.16.6"
+        "robmorgan/phinx": "^0.16.6",
+        "firebase/php-jwt": "^6.11"
     },
     "autoload": {
         "psr-4": {
