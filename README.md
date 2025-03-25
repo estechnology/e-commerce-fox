@@ -1,5 +1,5 @@
 Documentação dos Endpoints: https://documenter.getpostman.com/view/30434146/2sAYkKJHv9 <br>
-Link Publica da API: https://apifox.ngrok.dev <br><br>
+Link publicado da API: https://apifox.ngrok.dev <br><br>
 
 Abaixo descrevo como eu fui criando a logica dos itens desenvolvidos e sua sequencia para vocês irem acompanhando a linha de Raciocínio: <br><br>
 
