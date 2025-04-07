@@ -121,19 +121,66 @@ class CartController {
         return $response;
     }
 
-    public function listItemsTwig(Request $request, Response $response): Response {
+    public function listItemsTwig(Request $request, Response $response, array $args): Response {
+        // Obter o cart_id da URL
+        $cartId = $args['cart_id'];
+    
+        // Verificar se o cart_id foi recebido
+        if (!$cartId) {
+            $response->getBody()->write('Erro: ID do carrinho não foi fornecido.');
+            return $response->withStatus(400);
+        }
+    
         // Configurar o TWIG
-        $loader = new FilesystemLoader(__DIR__ . '/../Views/cart/');
+        $loader = new FilesystemLoader(__DIR__ . '/../Views/cart');
         $twig = new Environment($loader);
-
-        // Exemplo de consulta ao banco de dados
+    
+        // Consulta ao banco de dados para buscar os itens do carrinho
         $conn = $this->db->getConnection();
-        $result = $conn->fetchAssociative('SELECT "Mensagem sendo enviada para a view pela controller" AS mensagem');
-
-        // Renderizar o template com uma variável
-        $html = $twig->render('items.twig', ['mensagem' => $result['mensagem']]);
-
+        $items = $conn->fetchAllAssociative('
+            SELECT ci.id, ci.quantity, ci.price, p.name, p.description 
+            FROM cart_items ci
+            JOIN products p ON ci.product_id = p.id
+            WHERE ci.cart_id = ?
+        ', [$cartId]);
+    
+        // Calcular o total do carrinho
+        $total = array_reduce($items, function ($acc, $item) {
+            return $acc + ($item['quantity'] * $item['price']);
+        }, 0);
+    
+        // Renderizar o template com os itens e o total
+        $html = $twig->render('items.twig', [
+            'cart_id' => $cartId,
+            'items' => $items,
+            'total' => $total
+        ]);
+    
         $response->getBody()->write($html);
         return $response;
+    }
+
+
+    public function removeItemWithConfirmation(Request $request, Response $response, array $args): Response {
+        $itemId = $args['id'];
+
+        // Verificar se o item existe no banco de dados
+        $conn = $this->db->getConnection();
+        $item = $conn->fetchAssociative('SELECT * FROM cart_items WHERE id = ?', [$itemId]);
+
+        if (!$item) {
+            $response->getBody()->write('Erro: Item não encontrado.');
+            return $response->withStatus(404);
+        }
+
+        // Deletar o item do banco de dados
+        $conn->delete('cart_items', ['id' => $itemId]);
+
+        // Retornar uma mensagem de sucesso
+        $response->getBody()->write(json_encode([
+            'success' => true,
+            'message' => 'Item removido com sucesso.'
+        ]));
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

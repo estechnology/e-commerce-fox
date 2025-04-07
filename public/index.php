@@ -88,10 +88,15 @@ $app->get('/hello-twig', function (Request $request, Response $response, array $
     return $controller->index($request, $response);
 });
 
-
 $app->get('/{cart_id}/list-items-twig', function (Request $request, Response $response, array $args) use ($db) {
     $controller = new CartController($db);
-    return $controller->listItemsTwig($request, $response);
+    return $controller->listItemsTwig($request, $response, $args);
+});
+
+
+$app->delete('/cart/remove/{id}', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->removeItemWithConfirmation($request, $response, $args);
 });
 
 // Rota de teste para verificar a conexão com o banco de dados
