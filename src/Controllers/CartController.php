@@ -3,6 +3,8 @@ namespace App\Controllers;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 use App\Database;
 
 class CartController {
@@ -116,6 +118,22 @@ class CartController {
         $total = $conn->fetchOne('SELECT SUM(quantity * price) FROM cart_items WHERE cart_id = ?', [$cartId]);
 
         $response->getBody()->write('Total da compra: ' . $total);
+        return $response;
+    }
+
+    public function listItemsTwig(Request $request, Response $response): Response {
+        // Configurar o TWIG
+        $loader = new FilesystemLoader(__DIR__ . '/../Views/cart/');
+        $twig = new Environment($loader);
+
+        // Exemplo de consulta ao banco de dados
+        $conn = $this->db->getConnection();
+        $result = $conn->fetchAssociative('SELECT "Mensagem sendo enviada para a view pela controller" AS mensagem');
+
+        // Renderizar o template com uma variável
+        $html = $twig->render('items.twig', ['mensagem' => $result['mensagem']]);
+
+        $response->getBody()->write($html);
         return $response;
     }
 }

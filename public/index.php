@@ -9,12 +9,16 @@ use App\Controllers\CartController;
 use App\Controllers\AuthController;
 use App\Database;
 use App\Middleware\JwtMiddleware;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 $config = require __DIR__ . '/../config/config.php';
 $jwtConfig = require __DIR__ . '/../config/jwt.php';
 $db = new Database($config['db']);
 
 $app = AppFactory::create();
+
+$container = $app->getContainer();
 
 // Rota para autenticação do token.
 $app->post('/auth', function (Request $request, Response $response) use ($jwtConfig, $db) {
@@ -82,6 +86,12 @@ $app->get('/', function (Request $request, Response $response, array $args) {
 $app->get('/hello-twig', function (Request $request, Response $response, array $args) use ($db) {
     $controller = new HelloController($db);
     return $controller->index($request, $response);
+});
+
+
+$app->get('/{cart_id}/list-items-twig', function (Request $request, Response $response, array $args) use ($db) {
+    $controller = new CartController($db);
+    return $controller->listItemsTwig($request, $response);
 });
 
 // Rota de teste para verificar a conexão com o banco de dados
