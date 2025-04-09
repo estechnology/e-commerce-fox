@@ -1,5 +1,5 @@
 <b>Documentação dos Endpoints:</b> https://documenter.getpostman.com/view/30434146/2sAYkKJHv9 <br>
-<b>Link publicado da API:</b> https://apifox.ngrok.dev <br>
+<b>Link publicado da Aplicação com Twig:</b> https://apifox.ngrok.dev <br>
 <b>Pontos de melhoria:</b> Em se tratando de um endpooint com múltiplas requisições simultâneas, eu escolheria um outro framework para este projeto, utilizaria o Laravel Octane com Swoole, por trabalhar com requisições assincronas e de alto desempenho.<br><br>
 
 Abaixo descrevo como eu fui criando a logica dos itens desenvolvidos e sua sequencia para vocês irem acompanhando a linha de Raciocínio: <br><br>
