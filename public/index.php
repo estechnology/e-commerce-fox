@@ -67,10 +67,12 @@ $app->group('/carrinho', function (\Slim\Routing\RouteCollectorProxy $group) use
 });
 
 // Rotas públicas (Autenticação e Produtos)
-$app->get('/', function (Request $request, Response $response, array $args) {
-    $response->getBody()->write("Bem vindo a API de Carrinho de Compras, aqui você pode criar, atualizar e deletar carrinhos de compras, o projeto foi desenvolvido no Framework Slim e Twig. Qualquer dúvida entre em contato com o desenvolvedor => Eduardo Sampaio (17)98189-6773 ");
-    return $response;
+$app->get('/', function (Request $request, Response $response) use ($db) {
+    $productModel = new \App\Models\Product($db); // Crie uma Product Model
+    $controller = new \App\Controllers\ProductController($productModel, $db); // Crie um Product Controller
+    return $controller->listProducts($request, $response);
 });
+
 $app->post('/carrinho', function (Request $request, Response $response) use ($db) {
     $cartModel = new \App\Models\Cart($db);   // Instanciando o Cart Model
     $controller = new CartController($cartModel, $db);   // Passando o Cart Model e o db para o controller
