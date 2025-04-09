@@ -1,0 +1,40 @@
+{% extends "base.twig" %}
+
+{% block title %}Compra Finalizada{% endblock %}
+
+{% block content %}
+    <h2>Compra Finalizada com Sucesso!</h2>
+
+    <div class="alert alert-success">
+        <p>O valor total da sua compra é: <strong>R$ {{ total|number_format(2, ',', '.') }}</strong></p>
+        <p>Muito obrigado por comprar conosco!</p>
+        <p>Seu pedido #{{ cart_id }} foi processado com sucesso.</p>
+
+        {% if items|length > 0 %}
+            <hr>
+            <h3>Itens do seu Pedido:</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Preço Unitário</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>R$ {{ item.price|number_format(2, ',', '.') }}</td>
+                            <td>R$ {{ (item.quantity * item.price)|number_format(2, ',', '.') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <p><a href="/produtos" class="btn btn-primary">Voltar para a loja</a></p>
+    </div>
+{% endblock %}

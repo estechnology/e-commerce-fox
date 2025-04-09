@@ -19,61 +19,171 @@
             </thead>
             <tbody>
                 {% for item in items %}
-                    <tr>
+                    <tr data-item-id="{{ item.id }}">
                         <td>{{ item.name }}</td>
                         <td>{{ item.description }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>R$ {{ item.price|number_format(2, ',', '.') }}</td>
                         <td>R$ {{ (item.quantity * item.price)|number_format(2, ',', '.') }}</td>
                         <td>
-                            <button 
-                                class="btn btn-danger btn-sm" 
-                                onclick="confirmRemove({{ item.id }})">
-                                Remover
-                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmRemove({{ item.id }})">Remover</button>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                    <td colspan="2"><strong>R$ {{ total|number_format(2, ',', '.') }}</strong></td>
+                    <td colspan="6" class="text-center">
+                        <strong>Valor total da compra: R$ {{ total|number_format(2, ',', '.') }}</strong>
+                    </td>
                 </tr>
             </tfoot>
         </table>
 
-        <div class="mt-3">
-            <a href="/carrinho/{{ cart_id }}/finalizar" class="btn btn-success">Finalizar Compra</a>
-            <a href="/produtos" class="btn btn-primary">Continuar Comprando</a>
-        </div>
+    <div class="mt-3">
+        <form action="/carrinho/finalizar/{{ cart_id }}" method="post" class="d-inline-block">
+            <button type="submit" class="btn btn-success">Finalizar Compra</button>
+        </form>
+        
+        <button class="btn btn-info" onclick="openAddItemModal()">Adicionar Item</button>
+    </div>
+
     {% else %}
         <div class="alert alert-info">
             Seu carrinho está vazio. <a href="/produtos">Começar a comprar</a>
         </div>
     {% endif %}
 
+    <div class="modal" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addItemModalLabel">Adicionar Item ao Carrinho</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addItemForm">
+                        <div class="mb-3">
+                            <label for="product_id" class="form-label">Produto</label>
+                            <select class="form-select" id="product_id" required>
+                                <option value="" disabled selected>Escolha um produto</option>
+                                {% for product in products %}
+                                    <option value="{{ product.id }}" data-price="{{ product.price }}">{{ product.name }} - R$ {{ product.price|number_format(2, ',', '.') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantidade</label>
+                            <input type="number" class="form-control" id="quantity" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Adicionar Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-    function confirmRemove(itemId) {
-        if (confirm('Deseja realmente deletar este item?')) {
-            fetch(`/cart/remove/${itemId}`, {
-                method: 'DELETE',
+        function openAddItemModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
+            modal.show();
+        }
+
+        document.getElementById('addItemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const cartId = {{ cart_id }};
+            const productId = document.getElementById('product_id').value;
+            const quantity = document.getElementById('quantity').value;
+            const price = document.querySelector('#product_id option:checked').getAttribute('data-price');
+
+            fetch('/carrinho/adicionar', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    cart_id: cartId,
+                    product_id: productId,
+                    quantity: quantity,
+                    price: price
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    location.reload();
-                    // Remover o item da tabela
-                    document.querySelector(`tr[data-item-id="${itemId}"]`).remove();
+
+                    // Atualizar a tabela dinamicamente
+                    const itemsTableBody = document.querySelector('.table tbody');
+                    const newItem = data.item;
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.itemId = newItem.id;
+                    newRow.innerHTML = `
+                        <td>${newItem.name}</td>
+                        <td>${newItem.description}</td>
+                        <td>${newItem.quantity}</td>
+                        <td>R$ ${parseFloat(newItem.price).toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${(newItem.quantity * newItem.price).toFixed(2).replace('.', ',')}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="confirmRemove(${newItem.id})">Remover</button>
+                        </td>
+                    `;
+                    itemsTableBody.appendChild(newRow);
+
+                    // Recalcular e atualizar o total
+                    updateTotal();
+
+                    // Fechar o modal e limpar o formulário
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+                    modal.hide();
+                    document.getElementById('addItemForm').reset();
                 } else {
-                    alert('Erro ao remover o item.');
+                    alert(data.message);
                 }
             });
+        });
+
+        function confirmRemove(itemId) {
+            if (confirm('Deseja realmente deletar este item?')) {
+                fetch(`/cart/remove/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        const rowToRemove = document.querySelector(`tr[data-item-id="${itemId}"]`);
+                        if (rowToRemove) {
+                            rowToRemove.remove();
+                            updateTotal(); // Recalcular o total após a remoção
+                        }
+                    } else {
+                        alert('Erro ao remover o item.');
+                    }
+                });
+            }
         }
-    }
+
+        function updateTotal() {
+            let total = 0;
+            const itemRows = document.querySelectorAll('.table tbody tr');
+            itemRows.forEach(row => {
+                const quantity = parseInt(row.querySelector('td:nth-child(3)').textContent);
+                const priceText = row.querySelector('td:nth-child(4)').textContent.replace('R$ ', '').replace('.', '').replace(',', '.');
+                const price = parseFloat(priceText);
+                total += quantity * price;
+            });
+            const totalElement = document.querySelector('.table tfoot strong');
+            if (totalElement) {
+                totalElement.textContent = `Valor total da compra: R$ ${total.toFixed(2).replace('.', ',')}`;
+            }
+        }
+
+        // Chamar updateTotal na carga da página para garantir que o total seja correto inicialmente
+        document.addEventListener('DOMContentLoaded', updateTotal);
     </script>
 {% endblock %}

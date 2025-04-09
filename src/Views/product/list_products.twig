@@ -1,0 +1,208 @@
+{% extends "base.twig" %}
+
+{% block title %}Produtos Disponíveis
+{% endblock %}
+
+{% block content %}
+	<h2>Produtos Disponíveis</h2>
+
+	<div class="mb-3">
+		<label for="searchInput" class="form-label">Buscar Produto:</label>
+		<input type="text" class="form-control" id="searchInput" placeholder="Digite o nome do produto">
+	</div>
+
+	{% if products|length > 0 %}
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Descrição</th>
+					<th>Preço</th>
+					<th>Selecionar</th>
+					<th>Quantidade</th>
+				</tr>
+			</thead>
+			<tbody id="productsTableBody">
+				{% for product in products %}
+					<tr data-product-id="{{ product.id }}" data-price="{{ product.price }}">
+						<td>{{ product.name }}</td>
+						<td>{{ product.description }}</td>
+						<td>R$
+							{{ product.price|number_format(2, ',', '.') }}</td>
+						<td><input type="checkbox" name="products[{{ product.id }}][selected]"></td>
+						<td><input type="number" name="products[{{ product.id }}][quantity]" value="1" min="1" style="width: 70px;"></td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<form id="addToCartForm" action="#" method="post" class="mt-3 text-center">
+			<button type="button" class="btn btn-primary" onclick="adicionarAoCarrinho()">Adicionar Selecionados ao Carrinho</button>
+		</form>
+	{% else %}
+		<div class="alert alert-info">
+			Nenhum produto disponível no momento.
+		</div>
+	{% endif %}
+
+	<script>
+		const searchInput = document.getElementById('searchInput');
+const productsTableBody = document.getElementById('productsTableBody');
+const allProducts = {{ products|json_encode|raw }}; // Mantemos todos os produtos no JS
+
+searchInput.addEventListener('input', function () {
+const searchTerm = this.value.trim().toLowerCase();
+filterProducts(searchTerm);
+});
+
+function filterProducts(searchTerm) {
+productsTableBody.innerHTML = ''; // Limpa a tabela
+
+const filteredProducts = allProducts.filter(product => product.name.toLowerCase().includes(searchTerm));
+
+filteredProducts.forEach(product => {
+const row = document.createElement('tr');
+row.dataset.productId = product.id;
+row.dataset.price = product.price;
+row.innerHTML = `
+                    <td>${
+product.name
+}</td>
+                    <td>${
+product.description
+}</td>
+                    <td>R$ ${
+parseFloat(product.price).toFixed(2).replace('.', ',')
+}</td>
+                    <td><input type="checkbox" name="products[${
+product.id
+}][selected]"></td>
+                    <td><input type="number" name="products[${
+product.id
+}][quantity]" value="1" min="1" style="width: 70px;"></td>
+                `;
+productsTableBody.appendChild(row);
+});
+
+// Se a busca estiver vazia, re-exibe todos os produtos
+if (searchTerm === '') {
+displayAllProducts();
+}
+}
+
+function displayAllProducts() {
+productsTableBody.innerHTML = '';
+allProducts.forEach(product => {
+const row = document.createElement('tr');
+row.dataset.productId = product.id;
+row.dataset.price = product.price;
+row.innerHTML = `
+                    <td>${
+product.name
+}</td>
+                    <td>${
+product.description
+}</td>
+                    <td>R$ ${
+parseFloat(product.price).toFixed(2).replace('.', ',')
+}</td>
+                    <td><input type="checkbox" name="products[${
+product.id
+}][selected]"></td>
+                    <td><input type="number" name="products[${
+product.id
+}][quantity]" value="1" min="1" style="width: 70px;"></td>
+                `;
+productsTableBody.appendChild(row);
+});
+}
+
+async function adicionarAoCarrinho() {
+const produtosSelecionados = [];
+const checkboxes = document.querySelectorAll('input[name^="products"][type="checkbox"]');
+checkboxes.forEach(checkbox => {
+if (checkbox.checked) {
+const productId = checkbox.name.match(/\[(\d+)\]/)[1];
+const quantityInput = document.querySelector (`input[name="products[${productId}][quantity]"]`);
+const quantity = parseInt(quantityInput.value);
+const productRow = document.querySelector (`tr[data-product-id="${productId}"]`);
+const price = parseFloat(productRow.dataset.price);
+
+if (quantity > 0 && !isNaN(price)) {
+produtosSelecionados.push({product_id: productId, quantity: quantity, price: price});
+} else {
+console.error (`Não foi possível obter um preço válido para o produto ${productId}.`);
+alert (`Erro ao adicionar o produto ${productId} ao carrinho.`);
+return;
+}
+}
+});
+
+if (produtosSelecionados.length > 0) {
+try {
+const cartResponse = await fetch('/carrinho', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({})
+});
+const cartData = await cartResponse.json();
+const cartId = cartData.cart_id;
+
+if (cartId) {
+let allAdded = true;
+const errors = [];
+
+for (const item of produtosSelecionados) {
+const payload = {
+cart_id: cartId,
+product_id: item.product_id,
+quantity: item.quantity,
+price: item.price
+};
+
+const adicionarResponse = await fetch('/carrinho/adicionar', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json' // Mantenha como JSON
+},
+body: JSON.stringify(payload) // Envie como JSON
+});
+
+const adicionarData = await adicionarResponse.json();
+
+if (! adicionarData.success) {
+allAdded = false;
+errors.push(`Erro ao adicionar o produto ${
+item.product_id
+}: ${
+adicionarData.message
+}`);
+}
+console.log(`Tentativa de adicionar produto ${
+item.product_id
+} ao carrinho ${cartId}:`, adicionarData);
+}
+
+if (allAdded) {
+alert('Produtos adicionados ao carrinho!');
+window.location.href = `/${cartId}/list-items-twig`;
+} else {
+alert('Alguns produtos não foram adicionados ao carrinho:\n' + errors.join('\n'));
+}
+
+} else {
+alert('Erro ao criar o carrinho.');
+}
+
+} catch (error) {
+console.error('Erro ao adicionar ao carrinho:', error);
+alert('Ocorreu um erro ao adicionar os produtos ao carrinho.');
+}
+} else {
+alert('Selecione pelo menos um produto para adicionar ao carrinho.');
+}
+}
+	</script>
+{% endblock %}
