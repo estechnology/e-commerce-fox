@@ -2,6 +2,10 @@
 <b>Link publicado da Aplicação com Twig:</b> https://apifox.ngrok.dev <br>
 <b>Pontos de melhoria:</b> Em se tratando de um endpooint com múltiplas requisições simultâneas, eu escolheria um outro framework para este projeto, utilizaria o Laravel Octane com Swoole, por trabalhar com requisições assincronas e de alto desempenho.<br><br>
 
+Banco de dados<br>
+![image](https://github.com/user-attachments/assets/7db9c9f7-06cb-48ef-85bb-cffd935d9d9c)<br><br>
+
+
 Abaixo descrevo como eu fui criando a logica dos itens desenvolvidos e sua sequencia para vocês irem acompanhando a linha de Raciocínio: <br><br>
 
 1º Rode o git clone https://github.com/estechnology/e-commerce-fox.git<br>
